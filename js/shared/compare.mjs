@@ -1,0 +1,87 @@
+// Pure decision logic for the Image Compare A/B panel. No DOM in here — the
+// wiring lives in js/compare/index.js so this module stays testable
+// under node:test.
+
+export const COMPARE_MODES = ["slide", "toggle"];
+
+// "hold" was the press-and-hold mode that toggle replaced. Mapping it keeps a
+// workflow saved with it on the button it became, instead of quietly dropping
+// back to slide - the panel would still work, but not the way it was left.
+const LEGACY_MODES = { hold: "toggle" };
+
+export function normalizeCompareMode(value) {
+  const mapped = LEGACY_MODES[value] ?? value;
+  return COMPARE_MODES.includes(mapped) ? mapped : COMPARE_MODES[0];
+}
+
+// The caption under the stage: the compared resolution, or "" when nothing
+// has been loaded yet. Both sides are normally the same size, so A speaks for
+// the pair; when they differ, both are named rather than one quietly winning.
+export function compareSizeLabel(refs) {
+  const a = refs?.a;
+  const b = refs?.b;
+  if (!(a?.width > 0) || !(a?.height > 0)) return "";
+  if (b?.width > 0 && b?.height > 0 && (b.width !== a.width || b.height !== a.height)) {
+    return `A ${a.width}×${a.height} · B ${b.width}×${b.height}`;
+  }
+  return `${a.width}×${a.height}`;
+}
+
+// Fraction of the panel width covered by the pointer, clamped to 0..1.
+// Degenerate rectangles and non-finite input resolve to 0 (no left overlay).
+export function clipFraction(pointerX, rectLeft, rectWidth) {
+  const width = Number(rectWidth);
+  if (!Number.isFinite(width) || width <= 0) return 0;
+  const fraction = (Number(pointerX) - Number(rectLeft)) / width;
+  if (!Number.isFinite(fraction)) return 0;
+  return Math.max(0, Math.min(1, fraction));
+}
+
+// Give both edges a forgiving 6% landing zone. Leaving through any side
+// settles to the nearest full image instead of stranding a partial split.
+export function slideFraction(pointerX, rectLeft, rectWidth, leaving = false) {
+  const fraction = clipFraction(pointerX, rectLeft, rectWidth);
+  if (leaving) return fraction < 0.5 ? 0 : 1;
+  if (fraction <= 0.06) return 0;
+  if (fraction >= 0.94) return 1;
+  return fraction;
+}
+
+// CSS for a given reveal fraction: the overlay keeps its left portion up to the
+// seam, the rest is clipped away. The seam only shows while both images are
+// partially visible.
+export function compareClip(fraction) {
+  const value = Number(fraction);
+  const clamped = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
+  return {
+    clipPath: `inset(0 ${((1 - clamped) * 100).toFixed(2)}% 0 0)`,
+    seamLeft: `${(clamped * 100).toFixed(2)}%`,
+    seamVisible: clamped > 0 && clamped < 1,
+  };
+}
+
+// Pull the two preview references out of an onExecuted payload. Both must
+// be present for the panel to have anything meaningful to show.
+export function findCompareImages(message) {
+  const a = message?.a_images?.[0] ?? null;
+  const b = message?.b_images?.[0] ?? null;
+  return a?.filename && b?.filename ? { a, b } : null;
+}
+
+// Where the A and B labels sit: each on its own side of the split line, so
+// they move with it; one label, centred, while only one picture shows. A
+// side too narrow for its label drops the label rather than covering the
+// line. Pixel offsets from the stage's left edge, or null for no label.
+export function compareBadges(fraction, stageWidth, badgeWidth = 22, gap = 5) {
+  const width = Number(stageWidth);
+  const value = Number(fraction);
+  if (!Number.isFinite(width) || width <= 0) return { a: null, b: null };
+  const clamped = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
+  const centred = Math.round((width - badgeWidth) / 2);
+  if (clamped <= 0) return { a: null, b: centred };
+  if (clamped >= 1) return { a: centred, b: null };
+  const seam = clamped * width;
+  const a = Math.round(seam - gap - badgeWidth);
+  const b = Math.round(seam + gap);
+  return { a: a >= 4 ? a : null, b: b + badgeWidth <= width - 4 ? b : null };
+}

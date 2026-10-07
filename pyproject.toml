@@ -1,0 +1,10 @@
+[project]
+name = "ComfyUI-DJ_ImageExpand"
+version = "1.0"
+description = "图像扩展编辑器：旋转、裁剪、扩展画布（outpaint 底图），默认填充色 #414100"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.comfy]
+DisplayName = "DJ ImageExpand 工具 v1.0"
+Publisher = "DJ"
