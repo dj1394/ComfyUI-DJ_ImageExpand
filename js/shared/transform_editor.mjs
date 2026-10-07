@@ -550,12 +550,12 @@ export function installTransformNode(node, kind, mountPanel = null) {
   const panel = createElement("div", "dj-imageexpand-panel");
   const preview = createElement("canvas", "dj-imageexpand-preview");
   const row = createElement("div", "dj-imageexpand-row");
-  const open = createElement("button", "dj-imageexpand-button", "Open editor");
-  const resetCrop = createElement("button", "dj-imageexpand-button", "Reset crop");
-  resetCrop.title = "Show the whole picture again; rotation, padding and the timeline stay. With the padlock on, the bands it added to keep the shape go too.";
+  const open = createElement("button", "dj-imageexpand-button", "打开编辑器");
+  const resetCrop = createElement("button", "dj-imageexpand-button", "重置裁剪");
+  resetCrop.title = "恢复显示完整图片；旋转、填充和时间线保留。若比例锁开启，为保持形状而加的边距也会一并清除。";
   resetCrop.addEventListener("click", () => resetCropKeepingShape(state));
-  const reset = createElement("button", "dj-imageexpand-button", "Reset");
-  reset.title = "Reset rotation, crop and padding, and turn the padlock off. Fill, feather, Divisible by and the timeline stay.";
+  const reset = createElement("button", "dj-imageexpand-button", "重置");
+  reset.title = "重置旋转、裁剪和填充，并关闭比例锁。填充色、羽化、整除倍数和时间线保留。";
   reset.addEventListener("click", () => {
     resetGeometry(node);
     fitCrop(state); updateModalInfo(state); notifyAusbossChange();
@@ -3020,13 +3020,27 @@ export function disposeTransformNode(node) {
   delete node.__imageExpandTransformState;
 }
 
+// 输出槽显示名：RETURN_NAMES 已改成中文，但旧工作流里存的是英文槽名，
+// LiteGraph 会优先用节点上存的 name 渲染。这里统一按槽位顺序覆盖成中文，
+// 保证界面右上角的输出口永远是中文（2026-07-18 按用户要求）。
+const OUTPUT_LABELS = ["图像", "蒙版", "缝合器", "原图", "宽度", "高度", "提示图"];
+
 export function registerTransformExtension(nodeClass, kind, mountPanel = null) {
   app.registerExtension({
     name: `dajiangtools.image_expand.${nodeClass}`,
     beforeRegisterNodeDef(nodeType, nodeData) {
       if (nodeData.name !== nodeClass) return;
       hideInputsInDef(nodeData, HIDDEN_WIDGETS);
-      chainCallback(nodeType.prototype, "onNodeCreated", function () { installTransformNode(this, kind, mountPanel); });
+      // 定义层：新建节点和搜索预览都显示中文。
+      if (Array.isArray(nodeData.output_name)) nodeData.output_name = [...OUTPUT_LABELS];
+      chainCallback(nodeType.prototype, "onNodeCreated", function () {
+        installTransformNode(this, kind, mountPanel);
+        // 实例层：旧工作流里存的是英文槽名，LiteGraph 优先用节点上存的 name
+        // 渲染，这里按槽位顺序覆盖成中文。
+        for (const [index, output] of (this.outputs ?? []).entries()) {
+          if (OUTPUT_LABELS[index]) output.name = OUTPUT_LABELS[index];
+        }
+      });
       chainCallback(nodeType.prototype, "onRemoved", function () { disposeTransformNode(this); });
     },
   });

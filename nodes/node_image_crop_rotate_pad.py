@@ -21,12 +21,10 @@ from ._transform_inputs import resize_inputs, spec_from_values, transform_inputs
 class ImageExpand_DJ:
     CATEGORY = "DJ/ImageExpand"
     DESCRIPTION = (
-        "Loads an image and applies one visual rotate, crop, and pad transform. "
-        "The mask marks what to paint: new padding, the corners a turn leaves "
-        "empty, and see-through parts of the picture (less than 90% solid), "
-        "which are filled like the padding. Optionally resizes the result to a "
-        "megapixel budget (core Scale Image to Total Pixels semantics: aspect "
-        "preserved, dimensions rounded to resolution_steps)."
+        "加载图片并执行一次旋转、裁剪、扩展画布变换。"
+        "蒙版标记需要绘制的区域：新增填充边距、旋转留下的空角、以及图片中透明的部分（不透明度低于 90%），"
+        "这些部分按填充色处理。可选将结果缩放到指定百万像素预算"
+        "（核心 Scale Image to Total Pixels 语义：保持宽高比，尺寸取整到 resolution_steps）。"
     )
     SEARCH_ALIASES = ["image crop", "rotate image", "pad image", "outpaint canvas", "djimageexpand"]
 
@@ -79,19 +77,19 @@ class ImageExpand_DJ:
         return {"required": required, "optional": optional}
 
     # Appended outputs only: saved links ride slot indices.
+    # RETURN_NAMES 用中文显示名（2026-07-18 按用户要求）；槽位顺序不动，
+    # 已保存工作流的连线靠槽位索引挂载，改名不影响旧流程。
     RETURN_TYPES = ("IMAGE", "MASK", "DJ_IMAGEEXPAND_STITCHER", "IMAGE", "INT", "INT", "IMAGE")
-    RETURN_NAMES = ("image", "mask", "stitcher", "original", "width", "height", "prompt_image")
+    RETURN_NAMES = ("图像", "蒙版", "缝合器", "原图", "宽度", "高度", "提示图")
     OUTPUT_TOOLTIPS = (
-        "The transformed image batch in BHWC format.",
-        "White where the model paints: padding, the corners a turn leaves empty, "
-        "and see-through parts of your picture.",
-        "Full-canvas stitcher: restores kept source pixels over an outpaint result; wire to Stitch Inpaint.",
-        "Your picture before rotation, crop, padding or resize. See-through parts show as white.",
-        "Output width after the transform and any resize.",
-        "Output height after the transform and any resize.",
-        "The image with see-through parts shown on white instead of the fill. Wire it to "
-        "the node that writes your prompt, so a cutout gets a real backdrop. The same "
-        "as image when your picture has no see-through parts.",
+        "变换后的图像批次（BHWC 格式）。",
+        "白色区域为模型需要绘制的部分：填充边距、旋转留下的空角、以及图片中透明的部分。",
+        "全画布缝合器：在扩图结果上恢复保留的源图像素；接到 Stitch Inpaint 节点使用。",
+        "旋转、裁剪、填充或缩放之前的原图。透明部分显示为白色。",
+        "变换及缩放后的输出宽度。",
+        "变换及缩放后的输出高度。",
+        "将透明部分显示为白底（而非填充色）的图像。接到写提示词的节点，让抠图获得真实背景；"
+        "若图片没有透明部分，则与「图像」输出相同。",
     )
     FUNCTION = "load_transform"
 
@@ -121,7 +119,7 @@ class ImageExpand_DJ:
                 )
         stitcher = build_transform_stitcher(
             output, mask, geometry, int(stitch_blend), int(stitch_grow),
-            source="Image Crop + Rotate + Pad",
+            source="图像扩展编辑器",
         )
         # Nothing see-through: the prompt view is the image itself, as a copy
         # so no consumer can change one through the other.
@@ -142,7 +140,7 @@ class ImageExpand_DJ:
         try:
             resolve_input_path(image)
         except Exception as exc:
-            return f"Image Crop + Rotate + Pad: {exc}"
+            return f"图像扩展编辑器: {exc}"
         return True
 
     @classmethod
