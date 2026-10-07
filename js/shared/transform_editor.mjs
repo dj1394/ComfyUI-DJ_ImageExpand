@@ -2863,9 +2863,10 @@ function pointerMove(state, canvas, event) {
     if (aspectMode(state) === "pad") applyLock(state, drag.hold, cropDriver(drag.crop, next, drag.name), drag.pads);
   } else if (drag.kind === "move") {
     const crop = drag.crop;
-    // 框内拖动：跟随鼠标方向（2026-07-18 按用户要求由反向改为正向）。
+    // 框内拖动：裁切后（crop < 整图）取反，针对当前状态为正向；
+    // 整图无裁切时 slidePadding 用原值。
     const dx = -dxScreen / drag.map.scale; const dy = -dyScreen / drag.map.scale;
-    setCrop(state.node, { ...crop, x: Math.round(clamp(crop.x + dx, 0, drag.source.width - crop.width)), y: Math.round(clamp(crop.y + dy, 0, drag.source.height - crop.height)) });
+    setCrop(state.node, { ...crop, x: Math.round(clamp(crop.x - dx, 0, drag.source.width - crop.width)), y: Math.round(clamp(crop.y - dy, 0, drag.source.height - crop.height)) });
     // Where the crop spans the whole picture it has nowhere to go: the
     // picture slides inside its padding instead, in a canvas that keeps
     // its size.
