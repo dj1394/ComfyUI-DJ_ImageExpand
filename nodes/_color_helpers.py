@@ -22,8 +22,9 @@ from PIL import ImageColor
 from ._execution_helpers import warn_once
 
 # 解析失败时的兜底色：与 transform_inputs / TransformSpec 的默认填充色一致
-# （2026-07-17 按用户要求由中灰 128,128,128 改为 #414100 = RGB 65,65,0，即 0.255.0）。
-FALLBACK_RGB = (65, 65, 0)
+# （2026-07-17 按用户要求由中灰 128,128,128 改为 #414100 = RGB 65,65,0，即 0.255.0；
+#  2026-07-18 再次按用户要求改为纯绿色 #00ff00 = RGB 0,255,0）。
+FALLBACK_RGB = (0, 255, 0)
 
 _HEX_PATTERN = re.compile(r"^#?([0-9a-f]{3}|[0-9a-f]{6})$")
 _NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
@@ -82,7 +83,7 @@ def parse_fill_color(value: object, source: str = "Transform fill_color") -> tup
     # repeated line.
     safe = text.encode("ascii", "backslashreplace").decode("ascii")
     warn_once(
-        f"{source}: could not parse '{safe}'; using the default fill 65,65,0.",
+        f"{source}: could not parse '{safe}'; using the default fill 0,255,0.",
         _warned_values,
         key=f"{source}\x00{text}",
         limit=_WARNED_VALUE_LIMIT,

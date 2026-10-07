@@ -11,7 +11,7 @@
 //      2026-07-17: default moved from mid-gray #808080 to #414100 (0.255.0) on
 //      request; kept in sync with nodes/_color_helpers.py FALLBACK_RGB.
 
-export const FALLBACK_FILL = "#414100";
+export const FALLBACK_FILL = "#00ff00";
 
 const HEX_PATTERN = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/;
 const NUMBER_PATTERN = /^-?\d+(\.\d+)?$/;

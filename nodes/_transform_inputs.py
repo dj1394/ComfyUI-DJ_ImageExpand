@@ -95,7 +95,7 @@ def aspect_ratio_options(path: Path | None = None) -> list[str]:
     return AspectRatioChoices(options)
 
 
-def transform_inputs(*, feather: int = 24, fill_color: str = "#414100") -> dict[str, tuple]:
+def transform_inputs(*, feather: int = 24, fill_color: str = "#00ff00") -> dict[str, tuple]:
     """The shared rotate/crop/pad widgets. ``feather`` and ``fill_color`` are
     the defaults a fresh node starts with: the image nodes keep the soft grey
     canvas inpaint models like, the clip node asks for black and a hard edge.

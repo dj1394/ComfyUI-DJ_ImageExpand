@@ -18,7 +18,7 @@ export const IDENTITY_TRANSFORM = Object.freeze({
   // 2026-07-17: default fill moved from #808080 to #414100 (0.255.0) on request;
   // declaredTransformDefaults still overrides this with the node's own declared
   // default, so the clip node keeps its black fill.
-  fill_color: "#414100",
+  fill_color: "#00ff00",
 });
 
 export function resetTransformValues(includeTimeline = false) {

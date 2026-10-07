@@ -1215,7 +1215,7 @@ function buildCanvasRow(state) {
   centreLabel.append(createElement("span", "", "Center"), centre.root);
   row.append(centreLabel);
   const sync = () => {
-    fill.value = normalizeColor(value(node, "fill_color", "#414100"));
+    fill.value = normalizeColor(value(node, "fill_color", "#00ff00"));
     fill.title = `${fill.title.split(" Now ")[0]} Now ${fill.value}.`;
     feather.set(value(node, "feather", 0));
     centre.sync();
@@ -1853,7 +1853,7 @@ function buildControls(state, sidebar) {
 
   const padSection = createElement("section", "dj-imageexpand-section"); padSection.append(sectionHeading("Padding & mask", "pad"));
   const color = createElement("input"); color.type = "color"; color.className = "dj-imageexpand-swatch";
-  color.value = normalizeColor(value(node, "fill_color", "#414100"));
+  color.value = normalizeColor(value(node, "fill_color", "#00ff00"));
   color.addEventListener("input", () => { setValue(node, "fill_color", color.value); draw(state); });
   color.addEventListener("change", () => notifyAusbossChange());
   addLabeledControl(padSection, "Fill", color);
@@ -1934,7 +1934,7 @@ function buildControls(state, sidebar) {
   state.syncEditorControls = () => {
     rotationNumber.set(Number(value(node, "rotation_degrees", 0)) || 0);
     featherNumber.set(value(node, "feather", 24));
-    multiple.set(value(node, "canvas_multiple", 1)); color.value = normalizeColor(value(node, "fill_color", "#414100"));
+    multiple.set(value(node, "canvas_multiple", 1)); color.value = normalizeColor(value(node, "fill_color", "#00ff00"));
     resize?.sync(); budget?.set(value(node, "megapixels", 1)); steps?.set(value(node, "resolution_steps", 1));
     if (more) more.value = extra.includes(liveRequest(state) ?? "") ? liveRequest(state) : "";
   };
@@ -2367,7 +2367,7 @@ function keepStageRoom(state) {
 // still read as bands. Only the picture the crop cuts away is darkened.
 function drawScene(context, state, render, compact, interactive) {
   const { sourceRect, cropRect, outputRect } = render; context.save();
-  const fill = normalizeColor(value(state.node, "fill_color", "#414100"));
+  const fill = normalizeColor(value(state.node, "fill_color", "#00ff00"));
   // Show blend's tint already holds the painted parts: one teal at a time.
   const blend = !compact && state.showBlend && widget(state.node, "stitch_blend");
   const tint = !blend && settings().show_mask ? maskLayer(state)?.tint : null;
@@ -2863,7 +2863,8 @@ function pointerMove(state, canvas, event) {
     if (aspectMode(state) === "pad") applyLock(state, drag.hold, cropDriver(drag.crop, next, drag.name), drag.pads);
   } else if (drag.kind === "move") {
     const crop = drag.crop;
-    const dx = dxScreen / drag.map.scale; const dy = dyScreen / drag.map.scale;
+    // 框内拖动：跟随鼠标方向（2026-07-18 按用户要求由反向改为正向）。
+    const dx = -dxScreen / drag.map.scale; const dy = -dyScreen / drag.map.scale;
     setCrop(state.node, { ...crop, x: Math.round(clamp(crop.x + dx, 0, drag.source.width - crop.width)), y: Math.round(clamp(crop.y + dy, 0, drag.source.height - crop.height)) });
     // Where the crop spans the whole picture it has nowhere to go: the
     // picture slides inside its padding instead, in a canvas that keeps

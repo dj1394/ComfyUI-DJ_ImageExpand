@@ -53,7 +53,7 @@ class TransformSpec:
     canvas_multiple: int = 1
     # 与 _transform_inputs.transform_inputs 的默认值保持一致（2026-07-17 按用户要求
     # 由 #808080 改为 #414100 = RGB 65,65,0，即 0.255.0）；这是 API 提示缺省时的兜底。
-    fill_color: str = "#414100"
+    fill_color: str = "#00ff00"
 
     def normalized(self) -> "TransformSpec":
         angle = ((float(self.rotation_degrees) + 180.0) % 360.0) - 180.0
