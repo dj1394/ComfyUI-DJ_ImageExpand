@@ -105,8 +105,8 @@ const CORE_IMAGE_PREVIEW_WIDGET = "$$canvas-image-preview";
 const SETTINGS_SCOPE = "image_crop_rotate_pad";
 const SETTINGS_SCHEMA = [
   {
-    key: "show_mask", label: "Show the mask on the picture", type: "toggle", default: true,
-    hint: "Teal over the parts of your picture the model paints: a mask drawn in the MaskEditor, or see-through parts of a PNG.",
+    key: "show_mask", label: "在图上显示蒙版", type: "toggle", default: true,
+    hint: "青色覆盖模型需要绘制的区域：MaskEditor 画的蒙版，或 PNG 中的透明部分。",
   },
 ];
 let transformSettings = null;
@@ -379,19 +379,19 @@ function buildMediaSourceCard(state) {
   const { node, kind } = state;
   const root = createElement("div", "dj-imageexpand-source");
   const modes = createElement("div", "dj-imageexpand-source-mode");
-  const uploadsMode = createElement("button", "", "Uploads");
-  const localMode = createElement("button", "", "Server file");
+  const uploadsMode = createElement("button", "", "上传文件");
+  const localMode = createElement("button", "", "服务器文件");
   uploadsMode.type = localMode.type = "button";
-  uploadsMode.title = "Choose a video already in ComfyUI's input folder or upload another.";
-  localMode.title = "A video already on the ComfyUI server, inside its input, output or temp folder, read in place without copying it.";
+  uploadsMode.title = "选择 ComfyUI input 文件夹里已有的视频，或再上传一个。";
+  localMode.title = "读取 ComfyUI 服务器上 input、output 或 temp 文件夹内已有的视频，原地读取不复制。";
   modes.append(uploadsMode, localMode);
 
   const field = createElement("div", "dj-imageexpand-source-field");
   // The media picker previews the hovered file, which a native <select> cannot.
   const picker = createMediaPicker({
     kind: kind === "video" ? "video" : "image",
-    placeholder: `Choose an uploaded ${kind}…`,
-    label: `Uploaded ${kind}`,
+    placeholder: kind === "video" ? "选择已上传的视频…" : "选择已上传的图片…",
+    label: kind === "video" ? "已上传的视频" : "已上传的图片",
     viewUrl: (name) => api.apiURL(`/view?${mediaViewQuery(name)}`),
     getOptions: () => currentOptions(),
     getValue: () => value(node, kind, ""),
@@ -405,14 +405,14 @@ function buildMediaSourceCard(state) {
   localPath.type = "text";
   localPath.spellcheck = false;
   localPath.placeholder = "/absolute/path/to/video.mp4";
-  localPath.setAttribute("aria-label", "Server file path");
+  localPath.setAttribute("aria-label", "服务器文件路径");
   const upload = createElement("label", "dj-imageexpand-button dj-imageexpand-file dj-imageexpand-source-action");
-  const uploadText = createElement("span", "", "Upload");
+  const uploadText = createElement("span", "", "上传");
   upload.append(uploadText);
   const fileInput = createElement("input");
   fileInput.type = "file";
   fileInput.accept = `${kind}/*`;
-  fileInput.setAttribute("aria-label", `Upload ${kind}`);
+  fileInput.setAttribute("aria-label", kind === "video" ? "上传视频" : "上传图片");
   upload.append(fileInput);
   const hint = createElement("div", "dj-imageexpand-source-hint");
   field.append(picker.element, upload);
@@ -440,7 +440,7 @@ function buildMediaSourceCard(state) {
     else field.append(picker.element, upload);
     hint.textContent = source.hint;
     hint.title = source.mode === LOCAL_PATH_MODE
-      ? `${source.hint} Only videos inside ComfyUI's input, output or temp folder can be read.`
+      ? `${source.hint} 只能读取 ComfyUI 的 input、output 或 temp 文件夹内的视频。`
       : source.hint;
     // "Choose an uploaded video" has done its job once one is chosen; its
     // line goes to the picture. The Server file note stays while you type.
@@ -471,18 +471,18 @@ function buildMediaSourceCard(state) {
   fileInput.addEventListener("change", async () => {
     if (!fileInput.files?.[0]) return;
     fileInput.disabled = true;
-    uploadText.textContent = "Uploading…";
+    uploadText.textContent = "上传中…";
     upload.setAttribute("aria-busy", "true");
     try {
       await uploadMedia(node, kind, fileInput.files[0]);
       sync();
       notifyAusbossChange();
     } catch (error) {
-      showToast({ severity: "error", summary: "Crop + Rotate + Pad \u{1F18E}", detail: error.message, life: 8000 });
+      showToast({ severity: "error", summary: "图像扩展编辑器 \u{1F18E}", detail: error.message, life: 8000 });
     } finally {
       fileInput.value = "";
       fileInput.disabled = false;
-      uploadText.textContent = "Upload";
+      uploadText.textContent = "上传";
       upload.removeAttribute("aria-busy");
     }
   });
@@ -499,19 +499,19 @@ function sourceHeading() {
   const head = createElement("div", "dj-imageexpand-source-head");
   const gear = createElement("button", "dj-imageexpand-gear");
   gear.type = "button";
-  gear.title = "Image Crop + Rotate + Pad settings";
+  gear.title = "图像扩展编辑器设置";
   gear.innerHTML = gearIconSvg(11);
   gear.addEventListener("click", () => openSettingsMenu({
     scope: SETTINGS_SCOPE,
     schema: SETTINGS_SCHEMA,
     anchor: gear.getBoundingClientRect(),
-    title: "Image Crop + Rotate + Pad settings",
+    title: "图像扩展编辑器设置",
     onChange: (values) => {
       transformSettings = values;
       for (const live of liveStates) draw(live);
     },
   }));
-  head.append(createElement("div", "dj-imageexpand-source-heading", "Image source"), gear);
+  head.append(createElement("div", "dj-imageexpand-source-heading", "图片来源"), gear);
   return head;
 }
 
@@ -696,7 +696,7 @@ function installVideoDrop(state) {
       if (state.ready) await onSourceChanged(state, true);
       notifyAusbossChange();
     } catch (error) {
-      showToast({ severity: "error", summary: "Crop + Rotate + Pad \u{1F18E}", detail: error.message, life: 8000 });
+      showToast({ severity: "error", summary: "图像扩展编辑器 \u{1F18E}", detail: error.message, life: 8000 });
     }
     return true;
   };

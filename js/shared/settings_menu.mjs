@@ -465,9 +465,9 @@ export function openSettingsMenu({ scope, schema, anchor, title, onChange, initi
   renderRows();
 
   const foot = el("div", "djimageexpand-set-foot");
-  const reset = el("button", "djimageexpand-set-btn", "Reset");
+  const reset = el("button", "djimageexpand-set-btn", "重置");
   reset.type = "button";
-  reset.title = "Back to defaults for this node type";
+  reset.title = "恢复此节点类型的默认设置";
   reset.addEventListener("click", () => {
     resetSettings(scope);
     // persist:false entries mirror the open node, not a stored default, so
@@ -481,7 +481,7 @@ export function openSettingsMenu({ scope, schema, anchor, title, onChange, initi
     renderRows();
     onChange?.(values, null);
   });
-  const done = el("button", "djimageexpand-set-btn primary", "Done");
+  const done = el("button", "djimageexpand-set-btn primary", "完成");
   done.type = "button";
   done.addEventListener("click", () => closeSettingsMenu());
   foot.append(reset, done);

@@ -26,8 +26,8 @@ export function videoSourceState(mode, video, localPath) {
     selection,
     key: selection ? `${normalizedMode === LOCAL_PATH_MODE ? "local" : "input"}:${selection}` : "",
     hint: normalizedMode === LOCAL_PATH_MODE
-      ? "Reads directly from this server without copying the file."
-      : "Choose an uploaded video or add one to ComfyUI's input folder.",
+      ? "直接从服务器读取，不复制文件。"
+      : "选择已上传的视频，或往 ComfyUI 的 input 文件夹里加一个。",
   };
 }
 
@@ -40,6 +40,6 @@ export function mediaSourceState(kind, mode, selection, localPath) {
     mode: INPUT_FOLDER_MODE,
     selection: image,
     key: image,
-    hint: "Choose an uploaded image or drop one onto this node.",
+    hint: "选择已上传的图片，或拖一张到本节点上。",
   };
 }

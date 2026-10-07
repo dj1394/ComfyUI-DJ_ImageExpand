@@ -74,7 +74,8 @@ export function closeMediaMenu() {
  */
 export function createMediaPicker({ kind = "image", className = "", placeholder, viewUrl, getOptions, getValue, onChange, label }) {
   ensureCss();
-  const noun = kind === "video" ? "video" : "image";
+  // 中文名词：菜单里的提示文字统一用中文（图片/视频）。
+  const noun = kind === "video" ? "视频" : "图片";
   const button = el("button", `djimageexpand-media-pick ${className}`.trim());
   button.type = "button";
   button.setAttribute("aria-haspopup", "listbox");
@@ -86,7 +87,7 @@ export function createMediaPicker({ kind = "image", className = "", placeholder,
     const shown = value == null ? "" : String(value);
     text.textContent = shown || placeholder;
     text.classList.toggle("empty", !shown);
-    button.title = shown ? `${shown}\nClick to choose another ${noun}` : placeholder;
+    button.title = shown ? `${shown}\n点击选择其他${noun}` : placeholder;
   };
 
   const open = () => {
@@ -98,8 +99,8 @@ export function createMediaPicker({ kind = "image", className = "", placeholder,
     const filter = el("input", "djimageexpand-media-filter");
     filter.type = "text";
     filter.spellcheck = false;
-    filter.placeholder = all.length ? `Filter ${all.length} ${noun}${all.length === 1 ? "" : "s"}…` : `No ${noun}s in the input folder`;
-    filter.setAttribute("aria-label", `Filter ${noun}s`);
+    filter.placeholder = all.length ? `筛选 ${all.length} 个${noun}…` : "input 文件夹里没有该类型的文件";
+    filter.setAttribute("aria-label", `筛选${noun}`);
     const list = el("div", "djimageexpand-media-list");
     list.setAttribute("role", "listbox");
     column.append(filter, list);
@@ -122,7 +123,7 @@ export function createMediaPicker({ kind = "image", className = "", placeholder,
       if (value == null) return;
       const failed = () => {
         if (mine !== serial) return;
-        stage.replaceChildren(el("div", "djimageexpand-media-note", `Can't preview this ${noun}`));
+        stage.replaceChildren(el("div", "djimageexpand-media-note", `无法预览此${noun}`));
       };
       if (kind === "video") {
         const video = document.createElement("video");
@@ -190,8 +191,8 @@ export function createMediaPicker({ kind = "image", className = "", placeholder,
         list.append(item);
         items.push(item);
       }
-      if (shown.length > LIST_CAP) list.append(el("div", "djimageexpand-media-more", `${shown.length - LIST_CAP} more · type to narrow`));
-      if (!shown.length) list.append(el("div", "djimageexpand-media-more", all.length ? "No matches" : `Upload ${noun === "video" ? "a video" : "an image"} and it shows up here`));
+      if (shown.length > LIST_CAP) list.append(el("div", "djimageexpand-media-more", `还有 ${shown.length - LIST_CAP} 个 · 输入关键字筛选`));
+      if (!shown.length) list.append(el("div", "djimageexpand-media-more", all.length ? "没有匹配项" : `上传一张${noun}后就会出现在这里`));
       const start = shown.indexOf(current);
       setHighlight(start >= 0 && start < items.length ? start : items.length ? 0 : -1, true);
       if (!items.length) showPreview(null);
