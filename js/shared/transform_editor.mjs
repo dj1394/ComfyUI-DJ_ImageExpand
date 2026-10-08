@@ -544,6 +544,7 @@ export function installTransformNode(node, kind, mountPanel = null) {
   suppressCoreImagePreview(node);
   suppressCoreVideoPreview(node);
   if (kind === "video") installVideoDrop(state);
+  else if (kind === "image") installImageDrop(state);
   for (const name of HIDDEN_WIDGETS) hideWidget(widget(node, name));
   liftSocket(node, "fixed_frames");
 
@@ -693,6 +694,33 @@ function installVideoDrop(state) {
     try {
       await uploadMedia(node, "video", file);
       state.syncSourceCard?.();
+      if (state.ready) await onSourceChanged(state, true);
+      notifyAusbossChange();
+    } catch (error) {
+      showToast({ severity: "error", summary: "图像扩展编辑器 \u{1F18E}", detail: error.message, life: 8000 });
+    }
+    return true;
+  };
+}
+
+// Dropping an image file on the node uploads it (core /upload/image) and
+// makes it the source. Same contract as installVideoDrop: return true from
+// onDragDrop to stop core's canvas handler from spawning a Load Image node.
+// The upstream plugin only wired this for video nodes; images were silently
+// rejected, which read as "drop support vanished" after the clean-up.
+function installImageDrop(state) {
+  const node = state.node;
+  node.onDragOver = (event) => {
+    const items = event?.dataTransfer?.items;
+    return Boolean(items && Array.from(items).some((item) => item.kind === "file"));
+  };
+  node.onDragDrop = async (event) => {
+    const file = Array.from(event?.dataTransfer?.files ?? []).find(
+      (candidate) => String(candidate.type).startsWith("image/"),
+    );
+    if (!file) return false;
+    try {
+      await uploadMedia(node, "image", file);
       if (state.ready) await onSourceChanged(state, true);
       notifyAusbossChange();
     } catch (error) {
