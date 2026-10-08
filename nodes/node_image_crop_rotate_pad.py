@@ -159,7 +159,7 @@ class ImageExpand_DJ:
 
 
 NODE_CLASS_MAPPINGS = {"ComfyUI-DJ_ImageExpand": ImageExpand_DJ}
-NODE_DISPLAY_NAME_MAPPINGS = {"ComfyUI-DJ_ImageExpand": "ComfyUI-DJ_ImageExpand_图像扩展编辑器"}
+NODE_DISPLAY_NAME_MAPPINGS = {"ComfyUI-DJ_ImageExpand": "ComfyUI-DJ_ImageExpand_裁切扩图"}
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
 
