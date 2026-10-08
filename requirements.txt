@@ -1,0 +1,10 @@
+# ComfyUI-DJ_ImageExpand 第三方依赖
+# 基础运行（缺了节点起不来）：
+numpy
+Pillow
+torch
+av          # PyAV，视频帧读取
+aiohttp     # 媒体上传 HTTP 服务
+# 可选增强（懒加载，缺了不影响基本功能，用到相关分支才需要）：
+scipy       # 形态学 / 距离变换
+pymatting   # 前景估计（抠图分支）
